@@ -3,3 +3,6 @@
 fire_app_log.txt
 vendor/
 build/
+javascripts/*
+!javascripts/vendor
+stylesheets/

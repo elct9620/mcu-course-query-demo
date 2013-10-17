@@ -71,7 +71,7 @@ YEAR = {
 
 App = angular.module 'CourseQuery', []
 
-App.controller "CourseController", ($scope)->
+App.controller "CourseController", ['$scope', ($scope)->
 
   $scope.page = 1
   $scope.perPage = 25
@@ -144,5 +144,4 @@ App.controller "CourseController", ($scope)->
           $scope.$apply()
       ,(query, error)->
         console.log "Error: #{error.message}"
-
-
+]

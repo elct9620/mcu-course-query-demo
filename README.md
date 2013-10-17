@@ -20,6 +20,7 @@
 ---
 
 無，如需資料庫相關設定，請使用 [MCUCourseCLI](https://github.com/elct9620/MCUCourseCLI) 套件輔助取得資料。
+註：MCUCourseCLI 仍在開發中，可能會與實際情況有所差異
 
 ### 匯出 SQL 供查訊系統使用
 1. `echo "DBConnection[driver]=sqlite\nDBConnection[database]=mcu.sqlite" > .mcuConfig`

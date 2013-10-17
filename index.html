@@ -1,0 +1,90 @@
+
+<!DOCTYPE html>
+<!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-tw" ng-app="CourseQuery"> <!--<![endif]-->
+
+<head>
+	<meta charset="utf-8">
+  <meta name="viewport" content="width=device-width">
+  <title>模擬選課系統 - 查詢範例</title>
+
+
+  <link rel="stylesheet" href="stylesheets/app.css">
+
+  <script src="vendor/angular/angular.min.js"></script>
+  <script src="javascripts/vendor/custom.modernizr.js"></script>
+
+</head>
+<body>
+
+  <div class="container">
+    <div class="row">
+        <h1>課程查詢</h1>
+    </div>
+    <div ng-controller="CourseController">
+      <div class="row" ng-hide="ready">
+        <div class="alert-box">
+            讀取課程資料中⋯⋯
+        </div>
+      </div>
+      <div class="row collapse" ng-show="ready">
+        <div class="large-2 columns">
+          <span class="prefix">課程名稱</span>
+        </div>
+        <div class="large-10 columns">
+          <input type="text" ng-model="course_query" ng-change="update()" placeholder="輸入課程名稱查詢">
+        </div>
+        <div class="large-2 columns">
+          <span class="prefix">課程代碼</span>
+        </div>
+        <div class="large-10 columns">
+          <input type="text" ng-model="course_code_query" ng-change="update()" placeholder="輸入課程代碼查詢">
+        </div>
+
+      </div>
+      <div class="row">
+        <table width="100%">
+          <thead>
+            <tr>
+              <th width="150">課程代碼</th>
+              <th width="150">班級代碼</th>
+              <th>課程名稱</th>
+              <th width="100">年級</th>
+              <th width="50">學分</th>
+              <th width="100">選課狀況</th>
+              <th width="100">學期</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr ng-repeat="course in getCourses(15)">
+              <td>{{course.code}}</td>
+              <td>{{course.class_code}}</td>
+              <td>
+                {{course.name}}
+                <span class="radius label">{{formatSelectType(course.select_type)}}</span>
+                <span class="radius label success">{{formatSystem(course.system)}}</span>
+              </td>
+              <td>{{formatYear(course.year)}}</td>
+              <td>{{course.credit}}</td>
+              <td>{{course.selected_people}} / {{course.max_people}}</td>
+              <td>{{formatSemester(course.semester)}}</td>
+            </tr>
+            </tbody>
+          </table>
+          <div class="pagination-centered">
+            <ul class="pagination">
+              <li ng-repeat="i in getRepeat(maxPage)" ng-class="{current: ($index+1==page)}">
+                <a href="javascript:void(0);" ng-click="changePage($index+1)">{{$index+1}}</a>
+              </li>
+            </ul>
+           </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <script src="vendor/jquery/jquery.min.js"></script>
+  <script src="vendor/sql.js/js/sql.js"></script>
+  <script src="javascripts/app.js"></script>
+
+</body>
+</html>

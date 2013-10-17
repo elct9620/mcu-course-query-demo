@@ -1,1 +1,173 @@
-(function(){var e,r,n,t,o,u,c,s;s=function(e,r,n,t,o){return n.length-1>r?n[r+1].match(/(INSERT|CREATE|DROP|PRAGMA|BEGIN|COMMIT)/)?e.transaction(function(u){return u.executeSql(n[r]+";",[],function(){return s(e,r+1,n,t,o)})},function(u){return console.log("Query error in ",n[r],u.message),s(e,r+1,n,t,o)}):(n[r+1]=n[r]+";\n"+n[r+1],s(e,r+1,n,t,o)):("function"==typeof o&&o(),console.log("Done importing!"))},c=function(e){return e.transaction(function(e){return e.executeSql("select 'drop table ' || name || ';' as cmd from sqlite_master where type = 'table';",[],function(e,r){var n,t,o,u,c,s,a;for(s=r.rows,a=[],t=u=0,c=s.length;c>u;t=++u)o=s[t],n=r.rows.item(t).cmd,a.push(e.executeSql(n,[],function(){return n=null},function(e,r){return console.log(r.message)}));return a})})},r=openDatabase("mcu","1.0","MCU Course Database",1048576),c(r,"mcu"),n={1:"通識",2:"必修",3:"選修",4:"教育"},o={1:"大學日間部",2:"碩士班",3:"海青班",4:"研碩士班",5:"博士班",6:"碩士專班"},t={1:"上學期",2:"下學期",3:"全學期"},u={0:"不區分",1:"一年級",2:"二年級",3:"三年級",4:"四年級",5:"五年級"},e=angular.module("CourseQuery",[]),e.controller("CourseController",function(e){return e.page=1,e.perPage=25,e.maxPage=1,e.ready=!1,e.course_query="",e.course_code_query="",$.get("mcu.sql",function(n){return s(r,2,n.split(";\n"),"mcu",function(){return e.ready=!0,e.$apply()})}),e.courses=[],e.formatSelectType=function(e){return n[e]},e.formatSystem=function(e){return o[e]},e.formatSemester=function(e){return t[e]},e.formatYear=function(e){return u[e]},e.getCourses=function(r){var n,t;return n=e.page||1,e.perPage=r,e.maxPage=Math.ceil(e.courses.length/r),t=e.courses.slice((n-1)*r,n*r)},e.getRepeat=function(e){return new Array(e)},e.changePage=function(r){return e.page=r},e.update=function(){var n,t;return e.page=1,e.maxPage=1,e.courses=[],0>=e.course_query.length&&0>=e.course_code_query.length?void 0:(t=[],e.course_query.length>0&&t.push("course_name LIKE '%"+e.course_query+"%'"),e.course_code_query.length>0&&t.push("course_code LIKE '%"+e.course_code_query+"%'"),n=t.join(" AND "),r.transaction(function(r){return r.executeSql("SELECT * FROM courses WHERE "+n+";",[],function(r,n){var t,o,u,c,s,a,l;for(a=n.rows,l=[],o=c=0,s=a.length;s>c;o=++c)u=a[o],t=n.rows.item(o),e.courses.push({system:t.system,select_type:t.select_type,code:t.course_code,class_code:t.class_code,name:t.course_name,selected_people:t.selected_people,max_people:t.max_people,credit:t.credit,year:t.year,semester:t.semester}),l.push(e.$apply());return l},function(e,r){return console.log("Error: "+r.message)})}))}})}).call(this);
+(function() {
+  var App, Db, SELECT_TYPE, SEMESTER, SYSTEM, YEAR, clearOldData, processQuery;
+
+  processQuery = function(db, i, queries, dbname, callback) {
+    if (i < queries.length - 1) {
+      if (!queries[i + 1].match(/(INSERT|CREATE|DROP|PRAGMA|BEGIN|COMMIT)/)) {
+        queries[i + 1] = queries[i] + ';\n' + queries[i + 1];
+        return processQuery(db, i + 1, queries, dbname, callback);
+      }
+      return db.transaction(function(query) {
+        return query.executeSql(queries[i] + ';', [], function(tx, result) {
+          return processQuery(db, i + 1, queries, dbname, callback);
+        });
+      }, function(err) {
+        console.log("Query error in ", queries[i], err.message);
+        return processQuery(db, i + 1, queries, dbname, callback);
+      });
+    } else {
+      if (typeof callback === "function") {
+        callback();
+      }
+      return console.log("Done importing!");
+    }
+  };
+
+  clearOldData = function(db, dbname) {
+    return db.transaction(function(query) {
+      return query.executeSql("select 'drop table ' || name || ';' as cmd from sqlite_master where type = 'table';", [], function(query, results) {
+        var command, i, _, _i, _len, _ref, _results;
+
+        _ref = results.rows;
+        _results = [];
+        for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+          _ = _ref[i];
+          command = results.rows.item(i).cmd;
+          _results.push(query.executeSql(command, [], function(query, results) {
+            return command = null;
+          }, function(query, error) {
+            return console.log(error.message);
+          }));
+        }
+        return _results;
+      });
+    });
+  };
+
+  Db = openDatabase('mcu', '1.0', 'MCU Course Database', 1024 * 1024);
+
+  clearOldData(Db, 'mcu');
+
+  SELECT_TYPE = {
+    1: '通識',
+    2: '必修',
+    3: '選修',
+    4: '教育'
+  };
+
+  SYSTEM = {
+    1: '大學日間部',
+    2: '碩士班',
+    3: '海青班',
+    4: '研碩士班',
+    5: '博士班',
+    6: '碩士專班'
+  };
+
+  SEMESTER = {
+    1: '上學期',
+    2: '下學期',
+    3: '全學期'
+  };
+
+  YEAR = {
+    0: '不區分',
+    1: '一年級',
+    2: '二年級',
+    3: '三年級',
+    4: '四年級',
+    5: '五年級'
+  };
+
+  App = angular.module('CourseQuery', []);
+
+  App.controller("CourseController", function($scope) {
+    $scope.page = 1;
+    $scope.perPage = 25;
+    $scope.maxPage = 1;
+    $scope.ready = false;
+    $scope.course_query = "";
+    $scope.course_code_query = "";
+    $.get('mcu.sql', function(data) {
+      return processQuery(Db, 2, data.split(';\n'), 'mcu', function() {
+        $scope.ready = true;
+        return $scope.$apply();
+      });
+    });
+    $scope.courses = [];
+    $scope.formatSelectType = function(code) {
+      return SELECT_TYPE[code];
+    };
+    $scope.formatSystem = function(code) {
+      return SYSTEM[code];
+    };
+    $scope.formatSemester = function(code) {
+      return SEMESTER[code];
+    };
+    $scope.formatYear = function(code) {
+      return YEAR[code];
+    };
+    $scope.getCourses = function(perPage) {
+      var page, returnData;
+
+      page = $scope.page || 1;
+      $scope.perPage = perPage;
+      $scope.maxPage = Math.ceil($scope.courses.length / perPage);
+      returnData = $scope.courses.slice((page - 1) * perPage, page * perPage);
+      return returnData;
+    };
+    $scope.getRepeat = function(number) {
+      return new Array(number);
+    };
+    $scope.changePage = function(page) {
+      return $scope.page = page;
+    };
+    return $scope.update = function() {
+      var queryString, querys;
+
+      $scope.page = 1;
+      $scope.maxPage = 1;
+      $scope.courses = [];
+      if ($scope.course_query.length <= 0 && $scope.course_code_query.length <= 0) {
+        return;
+      }
+      querys = [];
+      if ($scope.course_query.length > 0) {
+        querys.push("course_name LIKE '%" + $scope.course_query + "%'");
+      }
+      if ($scope.course_code_query.length > 0) {
+        querys.push("course_code LIKE '%" + $scope.course_code_query + "%'");
+      }
+      queryString = querys.join(" AND ");
+      return Db.transaction(function(query) {
+        return query.executeSql("SELECT * FROM courses WHERE " + queryString + ";", [], function(query, results) {
+          var course, i, _, _i, _len, _ref, _results;
+
+          _ref = results.rows;
+          _results = [];
+          for (i = _i = 0, _len = _ref.length; _i < _len; i = ++_i) {
+            _ = _ref[i];
+            course = results.rows.item(i);
+            $scope.courses.push({
+              system: course.system,
+              select_type: course.select_type,
+              code: course.course_code,
+              class_code: course.class_code,
+              name: course.course_name,
+              selected_people: course.selected_people,
+              max_people: course.max_people,
+              credit: course.credit,
+              year: course.year,
+              semester: course.semester
+            });
+            _results.push($scope.$apply());
+          }
+          return _results;
+        }, function(query, error) {
+          return console.log("Error: " + error.message);
+        });
+      });
+    };
+  });
+
+}).call(this);

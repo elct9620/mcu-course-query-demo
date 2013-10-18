@@ -1,7 +1,7 @@
 
 <!DOCTYPE html>
 <!--[if IE 8]> 				 <html class="no-js lt-ie9" lang="en" > <![endif]-->
-<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-tw" ng-app="CourseQuery"> <!--<![endif]-->
+<!--[if gt IE 8]><!--> <html class="no-js" lang="zh-tw"> <!--<![endif]-->
 
 <head>
 	<meta charset="utf-8">
@@ -12,10 +12,11 @@
   <link rel="stylesheet" href="stylesheets/app.css">
 
   <script src="vendor/angular/angular.min.js"></script>
+  <script src="javascripts/app.js"></script>
   <script src="javascripts/vendor/custom.modernizr.js"></script>
 
 </head>
-<body>
+<body ng-app="CourseQuery">
 
   <div class="container">
     <div class="row">
@@ -23,8 +24,8 @@
     </div>
     <div ng-controller="CourseController">
       <div class="row" ng-hide="ready">
-        <div class="alert-box">
-            讀取課程資料中⋯⋯
+        <div class="alert-box" ng-class="{alert: error}">
+          {{loadingMessage}}
         </div>
       </div>
       <div class="row collapse" ng-show="ready">
@@ -83,7 +84,6 @@
     </div>
   </div>
   <script src="vendor/jquery/jquery.min.js"></script>
-  <script src="javascripts/app.js"></script>
 
 </body>
 </html>

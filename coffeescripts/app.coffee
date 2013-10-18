@@ -32,8 +32,9 @@ clearOldData = (db, dbname)->
           console.log error.message
 
 # Import SQlite
-Db = openDatabase('mcu', '1.0', 'MCU Course Database', 1024 * 1024)
-clearOldData(Db, 'mcu')
+if window.openDatabase
+  Db = openDatabase('mcu', '1.0', 'MCU Course Database', 1024 * 1024)
+  clearOldData(Db, 'mcu')
 
 # Static Datas
 SELECT_TYPE = {
@@ -77,13 +78,20 @@ App.controller "CourseController", ['$scope', ($scope)->
   $scope.perPage = 25
   $scope.maxPage = 1
   $scope.ready = false
+  $scope.error = false
+  $scope.loadingMessage = "讀取課程資料中⋯⋯"
 
   $scope.course_query = ""
   $scope.course_code_query = ""
 
   $.get 'mcu.sql', (data)->
-    processQuery Db, 2, data.split(';\n'), 'mcu', ()->
-      $scope.ready = true
+    if window.openDatabase
+      processQuery Db, 2, data.split(';\n'), 'mcu', ()->
+        $scope.ready = true
+        $scope.$apply()
+    else
+      $scope.error = true
+      $scope.loadingMessage = "因為支援問題無法取得資料庫，建議使用 Chrome 讀取（將會在未來被修正）"
       $scope.$apply()
 
   $scope.courses = []

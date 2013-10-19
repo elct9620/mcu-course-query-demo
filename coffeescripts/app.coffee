@@ -70,7 +70,7 @@ YEAR = {
 
 # Angular App
 
-App = angular.module 'CourseQuery', []
+App = angular.module 'CourseQuery', ['ngRoute']
 
 App.controller "CourseController", ['$scope', ($scope)->
 
@@ -152,4 +152,22 @@ App.controller "CourseController", ['$scope', ($scope)->
           $scope.$apply()
       ,(query, error)->
         console.log "Error: #{error.message}"
+]
+
+App.controller 'CalendarController', ['$scope', ($scope)->
+
+]
+
+
+App.config ['$routeProvider', ($routeProvider)->
+  $routeProvider.when('/default', {
+    templateUrl: 'partials/default.html',
+    controller: 'CourseController'
+  })
+  .when('/calendar',
+    templateUrl: 'partials/calendar.html',
+    controller: 'CalendarController'
+  ).otherwise({
+    redirectTo: '/default'
+  })
 ]

@@ -1,7 +1,9 @@
+.DS_Store
 .sass-cache/
 .coffeescript-cache/
 fire_app_log.txt
-vendor/
+vendor/*
+!vendor/vex
 build/
 javascripts/*
 !javascripts/vendor

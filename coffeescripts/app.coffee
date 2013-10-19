@@ -32,9 +32,11 @@ clearOldData = (db, dbname)->
           console.log error.message
 
 # Import SQlite
+IS_REFRESH = false
+
 if window.openDatabase
   Db = openDatabase('mcu', '1.0', 'MCU Course Database', 1024 * 1024)
-  clearOldData(Db, 'mcu')
+  clearOldData(Db, 'mcu') if IS_REFRESH
 
 # Static Datas
 SELECT_TYPE = {
@@ -91,22 +93,10 @@ App.controller "CourseController", ['$scope', ($scope)->
   $scope.page = 1
   $scope.perPage = 25
   $scope.maxPage = 1
-  $scope.ready = false
-  $scope.error = false
-  $scope.loadingMessage = "讀取課程資料中⋯⋯"
 
   $scope.course_query = ""
   $scope.course_code_query = ""
 
-  $.get 'mcu.sql', (data)->
-    if window.openDatabase
-      processQuery Db, 2, data.split(';\n'), 'mcu', ()->
-        $scope.ready = true
-        $scope.$apply()
-    else
-      $scope.error = true
-      $scope.loadingMessage = "因為支援問題無法取得資料庫，建議使用 Chrome 讀取（將會在未來被修正）"
-      $scope.$apply()
 
   $scope.courses = []
 
@@ -170,6 +160,28 @@ App.controller "CourseController", ['$scope', ($scope)->
 
 App.controller 'CalendarController', ['$scope', ($scope)->
   $scope.courseTable = new Array(6)
+  $scope.vex = "Hi"
+  $scope.selecting = false
+  $scope.currentX = 0
+  $scope.currentY = 0
+
+  $scope.page = 1
+  $scope.perPage = 25
+  $scope.maxPage = 1
+
+  $scope.courses = []
+
+  $scope.formatSelectType = (code)->
+    return SELECT_TYPE[code]
+
+  $scope.formatSystem = (code)->
+    return SYSTEM[code]
+
+  $scope.formatSemester = (code)->
+    return SEMESTER[code]
+
+  $scope.formatYear = (code)->
+    return YEAR[code]
 
   for i in [0..5]
     $scope.courseTable[i] = new Array(14)
@@ -184,15 +196,96 @@ App.controller 'CalendarController', ['$scope', ($scope)->
     return COURSE_TIME[index]
 
   $scope.selectCourse = (x, y)->
+    $scope.selecting = true
+    $scope.currentX = x
+    $scope.currentY = y
+    $scope.updateCourseList(x, y)
+
+  $scope.activeCourse = (index)->
+    targetIndex = index + ($scope.page - 1) * $scope.perPage
+    course = $scope.courses[targetIndex]
+    x = $scope.currentX
+    y = $scope.currentY
+    $scope.courseTable[x][y] = {
+      name: course.name
+      class_code: course.class_code
+    }
+    $scope.selecting = false
+
+  $scope.changePage = (page)->
+    $scope.page = page
+
+  $scope.updateCourseList = (x, y)->
+    $scope.page = 1
+    $scope.maxPage = 1
+    $scope.courses = []
+
+    query = []
+    query.push("courses.id = teachers.course_id")
+    query.push("teachers.id = course_times.teacher_id")
+    query.push("teachers.course_day = #{x}")
+    query.push("course_times.time = #{COURSE_TIME[y]}")
+    queryString = query.join(" AND ")
+
+    Db.transaction (query) ->
+      query.executeSql "SELECT * FROM courses JOIN teachers LEFT JOIN course_times WHERE #{queryString};", [], (query, results)->
+        for _, i in results.rows
+          course = results.rows.item(i)
+          $scope.courses.push({
+            system: course.system
+            select_type: course.select_type
+            code: course.course_code
+            class_code: course.class_code
+            name: course.course_name
+            selected_people: course.selected_people
+            max_people: course.max_people
+            credit: course.credit
+            year: course.year
+            semester: course.semester
+          })
+          $scope.$apply()
+      ,(query, error)->
+        console.log "Error: #{error.message}"
 
   $scope.getCourseData = (x, y) ->
     if $scope.courseTable[x] and $scope.courseTable[x][y]
       return $scope.courseTable[x][y]
 
-    return "尚未選課"
+    return {
+      name: "尚未選課"
+      class_code: "000000"
+    }
+
+  $scope.getCourses = (perPage)->
+    page = $scope.page || 1
+    $scope.perPage = perPage
+    $scope.maxPage = Math.ceil($scope.courses.length / perPage)
+
+    returnData = $scope.courses.slice((page - 1) * perPage, page * perPage)
+    return returnData
+
+
 ]
 
 App.controller 'Navigation', ['$scope', '$route', ($scope, $route)->
+  $scope.ready = false
+  $scope.error = false
+  $scope.loadingMessage = "讀取課程資料中⋯⋯"
+
+  $.get 'mcu.sql', (data)->
+    if window.openDatabase
+      if IS_REFRESH
+        processQuery Db, 2, data.split(';\n'), 'mcu', ()->
+          $scope.ready = true
+          $scope.$apply()
+      else
+        $scope.ready = true
+        $scope.$apply()
+    else
+      $scope.error = true
+      $scope.loadingMessage = "因為支援問題無法取得資料庫，建議使用 Chrome 讀取（將會在未來被修正）"
+      $scope.$apply()
+
   $scope.isCurrent = (path)->
 
     if $route.current and $route.current.$$route and $route.current.$$route.controller is path
@@ -216,3 +309,4 @@ App.config ['$routeProvider', '$locationProvider', ($routeProvider, $locationPro
 
   $locationProvider.html5Mode(true);
 ]
+

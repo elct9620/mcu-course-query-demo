@@ -1,10 +1,5 @@
     <div ng-controller="CourseController">
-      <div class="row" ng-hide="ready">
-        <div class="alert-box" ng-class="{alert: error}">
-          {{loadingMessage}}
-        </div>
-      </div>
-      <div class="row collapse" ng-show="ready">
+      <div class="row collapse">
         <div class="large-2 columns">
           <span class="prefix">課程名稱</span>
         </div>
@@ -50,7 +45,7 @@
           </table>
           <div class="pagination-centered">
             <ul class="pagination">
-              <li ng-repeat="i in getRepeat(maxPage)" ng-class="{current: ($index+1==page)}">
+              <li ng-repeat="i in getRepeat(maxPage) track by $index" ng-class="{current: ($index+1==page)}">
                 <a href="javascript:void(0);" ng-click="changePage($index+1)">{{$index+1}}</a>
               </li>
             </ul>

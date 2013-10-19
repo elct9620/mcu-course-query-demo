@@ -1,5 +1,5 @@
-<div class="row">
-  <table width="100%">
+<div class="row" ng-controller="CalendarController">
+  <table id="calendar" width="100%" ng-hide="selecting">
     <thead>
       <tr>
         <th ng-repeat="value in getRepeat(7) track by $index">{{getCourseDay($index)}}</th>
@@ -9,9 +9,50 @@
       <tr ng-repeat="value in getRepeat(15) track by $index" ng-init="indexY = $index">
         <th height="100">{{getCourseTime($index)}}</th>
         <td ng-repeat="value in getRepeat(6) track by $index" ng-init="indexX = $index" ng-click="selectCourse(indexX, indexY)">
-          {{getCourseData(indexX, indexY)}}
+          <p class="label radius">{{getCourseData(indexX,indexY).class_code}}</p>
+          <div>{{getCourseData(indexX,indexY).name}}</div>
         </td>
       </tr>
     </tbody>
   </table>
+
+  <div ng-show="selecting">
+    <table width="100%">
+      <thead>
+        <tr>
+          <th width="150">課程代碼</th>
+          <th width="150">班級代碼</th>
+          <th>課程名稱</th>
+          <th width="100">年級</th>
+          <th width="50">學分</th>
+          <th width="100">選課狀況</th>
+          <th width="100">學期</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr ng-repeat="course in getCourses(15) track by $index">
+          <td>{{course.code}}</td>
+          <td>{{course.class_code}}</td>
+          <td>
+            <span ng-click="activeCourse($index)">{{course.name}}</span>
+            <span class="radius label">{{formatSelectType(course.select_type)}}</span>
+            <span class="radius label success">{{formatSystem(course.system)}}</span>
+          </td>
+          <td>{{formatYear(course.year)}}</td>
+          <td>{{course.credit}}</td>
+          <td>{{course.selected_people}} / {{course.max_people}}</td>
+          <td>{{formatSemester(course.semester)}}</td>
+        </tr>
+        </tbody>
+      </table>
+      <div class="pagination-centered">
+        <ul class="pagination">
+          <li ng-repeat="i in getRepeat(maxPage) track by $index" ng-class="{current: ($index+1==page)}">
+           <a href="javascript:void(0);" ng-click="changePage($index+1)">{{$index+1}}</a>
+          </li>
+        </ul>
+       </div>
+    </div>
+  </div>
+
 </div>

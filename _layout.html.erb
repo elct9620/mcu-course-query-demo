@@ -11,7 +11,7 @@
 
   <link rel="stylesheet" href="stylesheets/app.css">
 
-  <script src="vendor/angular/angular.js"></script>
+  <script src="vendor/angular/angular.min.js"></script>
   <script src="vendor/angular-route/angular-route.min.js"></script>
   <script src="javascripts/vendor/custom.modernizr.js"></script>
 
@@ -23,6 +23,9 @@
         <h1>課程查詢</h1>
     </div>
     <div class="row" ng-controller="Navigation">
+      <div class="alert-box" ng-class="{alert: error}" ng-hide="ready">
+        {{loadingMessage}}
+      </div>
       <nav class="top-bar">
         <ul class="title-area">
           <li class="name"></li>

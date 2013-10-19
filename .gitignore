@@ -3,7 +3,6 @@
 .coffeescript-cache/
 fire_app_log.txt
 vendor/*
-!vendor/vex
 build/
 javascripts/*
 !javascripts/vendor

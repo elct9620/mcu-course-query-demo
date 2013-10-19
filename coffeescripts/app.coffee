@@ -286,6 +286,15 @@ App.controller 'Navigation', ['$scope', '$route', ($scope, $route)->
       $scope.loadingMessage = "因為支援問題無法取得資料庫，建議使用 Chrome 讀取（將會在未來被修正）"
       $scope.$apply()
 
+  $scope.updateDatabase = ()->
+    unless $scope.error
+      $scope.ready = false
+      clearOldData(Db, 'mcu')
+      $.get 'mcu.sql', (data)->
+        processQuery Db, 2, data.split(';\n'), 'mcu', ()->
+          $scope.ready = true
+          $scope.$apply()
+
   $scope.isCurrent = (path)->
 
     if $route.current and $route.current.$$route and $route.current.$$route.controller is path

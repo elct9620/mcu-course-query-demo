@@ -1,4 +1,6 @@
+.DS_Store
 .sass-cache/
 .coffeescript-cache/
 fire_app_log.txt
 build/
+http_servlet_handler.rb

@@ -22,7 +22,26 @@
     <div class="row">
         <h1>課程查詢</h1>
     </div>
+    <div class="row" ng-controller="Navigation">
+      <nav class="top-bar">
+        <ul class="title-area">
+          <li class="name"></li>
+        </ul>
+        <section class="top-bar-section">
+          <ul class="right">
+            <li ng-class="{active: isCurrent('CourseController')}"><a href="/default">傳統模式</a></li>
+            <li class="divider"></li>
+            <li ng-class="{active: isCurrent('CalendarController')}"><a href="/calendar">課表模式</a></li>
+          </ul>
+        </section>
+      </nav>
+    </div>
+
     <%= yield %>
+
+    <div>
+      {{$location.path()}}
+    </div>
   </div>
   <script src="vendor/jquery/jquery.min.js"></script>
   <script src="javascripts/app.js"></script>

@@ -1,1 +1,17 @@
-Hello World
+<div class="row">
+  <table width="100%">
+    <thead>
+      <tr>
+        <th ng-repeat="value in getRepeat(7) track by $index">{{getCourseDay($index)}}</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr ng-repeat="value in getRepeat(15) track by $index" ng-init="indexY = $index">
+        <th height="100">{{getCourseTime($index)}}</th>
+        <td ng-repeat="value in getRepeat(6) track by $index" ng-init="indexX = $index" ng-click="selectCourse(indexX, indexY)">
+          {{getCourseData(indexX, indexY)}}
+        </td>
+      </tr>
+    </tbody>
+  </table>
+</div>

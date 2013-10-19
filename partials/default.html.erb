@@ -33,7 +33,7 @@
             </tr>
           </thead>
           <tbody>
-            <tr ng-repeat="course in getCourses(15)">
+            <tr ng-repeat="course in getCourses(15) track by $index">
               <td>{{course.code}}</td>
               <td>{{course.class_code}}</td>
               <td>

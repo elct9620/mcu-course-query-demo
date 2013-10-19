@@ -68,6 +68,20 @@ YEAR = {
   5: '五年級'
 }
 
+COURSE_DAY = {
+  0: '',
+  1: '星期一'
+  2: '星期二'
+  3: '星期三'
+  4: '星期四'
+  5: '星期五'
+  6: '星期六'
+}
+
+COURSE_TIME = [
+  '01', '02', '03', '04', '20', '05', '06', '07', '08', '09', '30', '40', '50', '60', '70'
+]
+
 # Angular App
 
 App = angular.module 'CourseQuery', ['ngRoute']
@@ -155,12 +169,41 @@ App.controller "CourseController", ['$scope', ($scope)->
 ]
 
 App.controller 'CalendarController', ['$scope', ($scope)->
+  $scope.courseTable = new Array(6)
 
+  for i in [0..5]
+    $scope.courseTable[i] = new Array(14)
+
+  $scope.getRepeat = (times)->
+    new Array(times)
+
+  $scope.getCourseDay = (index)->
+    return COURSE_DAY[index]
+
+  $scope.getCourseTime = (index)->
+    return COURSE_TIME[index]
+
+  $scope.selectCourse = (x, y)->
+
+  $scope.getCourseData = (x, y) ->
+    if $scope.courseTable[x] and $scope.courseTable[x][y]
+      return $scope.courseTable[x][y]
+
+    return "尚未選課"
+]
+
+App.controller 'Navigation', ['$scope', '$route', ($scope, $route)->
+  $scope.isCurrent = (path)->
+
+    if $route.current and $route.current.$$route and $route.current.$$route.controller is path
+      return true
+
+    return false
 ]
 
 
-App.config ['$routeProvider', ($routeProvider)->
-  $routeProvider.when('/default', {
+App.config ['$routeProvider', '$locationProvider', ($routeProvider, $locationProvider)->
+  $routeProvider.when('/', {
     templateUrl: 'partials/default.html',
     controller: 'CourseController'
   })
@@ -168,6 +211,8 @@ App.config ['$routeProvider', ($routeProvider)->
     templateUrl: 'partials/calendar.html',
     controller: 'CalendarController'
   ).otherwise({
-    redirectTo: '/default'
+    redirectTo: '/'
   })
+
+  $locationProvider.html5Mode(true);
 ]
